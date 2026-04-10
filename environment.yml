@@ -1,6 +1,11 @@
 # PhyloNaP Pipeline — Conda environment
+# Platform: macOS / Linux only
 # Install: conda env create -f environment.yml
 # Activate: conda activate phylonap_createdb
+#
+# NOTE: AliStat must be installed separately (not available via conda).
+#       Run ./install_alistat.sh or build from source, then set the path
+#       in config/config.yaml → tools.alistat
 name: phylonap_createdb
 channels:
   - conda-forge
@@ -16,7 +21,8 @@ dependencies:
   - mafft>=7.520
   - trimal>=1.5
   - fasttree>=2.1.11
-  - alistat>=1.14
+  # NOTE: alistat is NOT available via conda — install separately
+  #       (see install_alistat.sh or README)
 
   # --- TreeCluster ---
   - treecluster>=1.0.3

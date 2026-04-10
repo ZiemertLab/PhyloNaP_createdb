@@ -75,6 +75,10 @@ Input FASTA files
 
 ## Quick Start
 
+### Prerequisites
+
+> **Platform:** macOS or Linux only (Windows is not supported).
+
 ### 1. Create the Conda environment
 
 ```bash
@@ -82,7 +86,33 @@ conda env create -f environment.yml
 conda activate phylonap_createdb
 ```
 
-### 2. Configure
+### 2. Install AliStat
+
+[AliStat](https://github.com/thomaskf/AliStat) is required but not available via conda.
+Use the provided helper script:
+
+```bash
+./install_alistat.sh            # downloads, builds, and installs to ./tools/alistat
+```
+
+Or, if you already have AliStat installed, set the path in `config/config.yaml`:
+
+```yaml
+tools:
+  alistat: "/path/to/your/alistat"
+```
+
+To build manually:
+
+```bash
+wget https://github.com/thomaskf/AliStat/archive/refs/heads/master.tar.gz -O AliStat.tar.gz
+tar -zxvf AliStat.tar.gz
+cd AliStat-master
+make
+# copy the resulting 'alistat' binary somewhere on your $PATH
+```
+
+### 3. Configure
 
 Edit `config/config.yaml` to set your input data paths and parameters.
 
