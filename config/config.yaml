@@ -1,0 +1,122 @@
+# ============================================================================
+# PhyloNaP Database Build Pipeline — Configuration
+# ============================================================================
+# Edit paths below to match your local setup before running the pipeline.
+# All paths can be absolute or relative to the pipeline root directory.
+# ============================================================================
+
+# --- Output directory (all intermediate and final outputs go here) ----------
+output_dir: "results"
+
+# --- Input data sources -----------------------------------------------------
+# Each source is a FASTA or metadata file produced upstream of this pipeline.
+# See README.md § "Input data preparation" for expected formats.
+
+input_data:
+  # FASTA files — protein sequences from each source
+  mite_fasta_dir: "resources/mite_fasta/"          # directory of per-enzyme FASTA files from MITE
+  antismash_fasta: "resources/proteins_renamed_AS.fasta"
+  swissprot_fasta: "resources/uniprot_swiss_sequences.fasta"
+  mibig_fasta: "resources/mibig_prot_seqs_4.0.fasta"
+
+# --- Annotation source files ------------------------------------------------
+annotations:
+  # MITE
+  mite_summary_csv: "resources/mite_summary.csv"             # MITE summary table
+  mite_json_dir: "resources/mite_json/"                       # per-entry JSON directory
+
+  # MIBiG
+  mibig_annot_tsv: "resources/mibig_annotations.tsv"          # MIBiG protein annotations
+
+  # AntiSMASH / ClusterBlast
+  antismash_annot_tsv: "resources/antismash_annotations.tsv"  # merged AS annotation + taxonomy
+
+  # SwissProt
+  swissprot_annot_tsv: "resources/swissprot_annotations.tsv"  # UniProtKB reviewed entries
+
+  # EggNOG-mapper results
+  eggnog_annotations: "resources/eggnog_results.emapper.annotations"
+
+  # HMM-based superfamily classification
+  superfamily_hits_tsv: "resources/pe_superfamily_hits.tsv"
+
+  # PanBGC matches (optional)
+  panbgc_matches_tsv: "resources/PanBGC_matches.tsv"
+
+# --- Curated datasets (optional) -------------------------------------------
+# If provided, curated superfamilies are merged into the final database.
+# Set to null or remove to build automatic-only database.
+curated_json: null   # e.g. "resources/curated.json"
+curated_data_dir: null  # e.g. "resources/curated_datasets/"
+
+# --- ID mapping -------------------------------------------------------------
+# PE ID mapping: maps original sequence IDs → internal PE identifiers.
+# Produced during initial data collection (not part of this pipeline).
+id_mapping:
+  pe_mapping_tsv: "resources/pe_id_mapping.tsv"       # original_id <TAB> PE_id
+  cluster_mapping_tsv: "resources/cluster_pe_mapping.tsv"  # cluster_rep <TAB> member_PE_ids
+
+# --- External tool paths (leave empty to use $PATH) -------------------------
+tools:
+  mmseqs: ""       # path to mmseqs binary (default: from $PATH)
+  mafft: ""        # path to mafft binary
+  trimal: ""       # path to trimal binary
+  fasttree: ""     # path to FastTree binary
+  treecluster: ""  # path to TreeCluster.py
+  alistat: ""      # path to alistat binary
+  rscript: ""      # path to Rscript binary (for MAD rooting)
+
+# --- Pipeline parameters ---------------------------------------------------
+params:
+  # Step 01: MMseqs2 initial clustering
+  mmseqs_sensitivity: 7.5
+  mmseqs_min_aln_len: 80
+  mmseqs_threads: 8
+
+  # Step 02: Cluster filtering
+  min_cluster_size: 10        # minimum sequences per cluster
+  min_bgc_sequences: 3        # minimum BGC-derived sequences (AS* or BGC*)
+
+  # Step 03: Alignment & trimming
+  mafft_maxiterate: 100       # MAFFT --maxiterate
+  trimal_mode: "-automated1"  # trimAl trimming strategy
+
+  # Step 05: TreeCluster subclustering
+  treecluster_threshold: 4    # distance threshold for TreeCluster
+  min_subcluster_size: 10     # minimum subcluster size to keep
+
+  # Step 07: Sequence quality filtering
+  cr_threshold: 0.6           # per-sequence alignment completeness (AliStat Cr)
+  ca_threshold: 0.7           # alignment completeness threshold
+  retention_threshold: 0.75   # trimAl retention ratio threshold
+  min_mean_seq_length: 70     # minimum mean original sequence length (aa)
+  min_seqs_after_filter: 10   # minimum sequences after filtering
+
+  # Step 08: Annotation
+  annotation_priority:        # highest priority first
+    - MITE
+    - MIBiG
+    - SwissProt
+    - AS_db
+
+  # Step 10: Dataset filtering (biosynthetic relevance)
+  require_bgc_linkage: true   # require ≥1 AS_db or MIBiG sequence
+
+  # Step 11: Phylogenetic tree building
+  fasttree_model: "-lg -gamma"  # FastTree substitution model
+  fasttree_timeout: 3600        # seconds per tree (60 min)
+  min_seqs_for_tree: 4          # minimum sequences for tree building
+
+  # Step 13: Tree rooting
+  taxonomy_rooting: true        # try taxonomy-based outgroup rooting first
+  mad_rooting_fallback: true    # fallback to MAD rooting when taxonomy fails (requires R)
+  taxonomy_min_outgroup: 2      # minimum outgroup sequences
+  taxonomy_min_coverage: 0.7    # minimum annotation coverage for rooting
+
+  # Step 15: Reference database (dereplication + MMseqs2 index)
+  dereplication_identity: 0.7   # MMseqs2 dereplication identity
+  dereplication_coverage: 0.8   # MMseqs2 dereplication coverage
+
+  # Step 14: Database generation (JSON + SQLite)
+  pt_id_prefix: "PT"           # prefix for dataset IDs
+  pt_id_digits: 6              # zero-pad width

@@ -1,0 +1,39 @@
+# PhyloNaP Pipeline — Conda environment
+# Install: conda env create -f environment.yml
+# Activate: conda activate phylonap_createdb
+name: phylonap_createdb
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  # --- Core Python ---
+  - python=3.11
+  - pip
+
+  # --- Bioinformatics tools ---
+  - mmseqs2>=15.6
+  - mafft>=7.520
+  - trimal>=1.5
+  - fasttree>=2.1.11
+  - alistat>=1.14
+
+  # --- TreeCluster ---
+  - treecluster>=1.0.3
+
+  # --- Snakemake ---
+  - snakemake>=8.0
+
+  # --- R + MAD rooting ---
+  - r-base>=4.3
+  - r-ape>=5.7
+  - r-phangorn>=2.11
+  - r-rcpp>=1.0
+  - r-inline>=0.3
+  - r-optparse>=1.7
+
+  # --- Python packages ---
+  - pandas>=2.1
+  - biopython>=1.83
+  - pyyaml>=6.0
+  - numpy>=1.26
