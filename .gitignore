@@ -4,3 +4,4 @@ config/config_dev.yaml
 logs/
 .snakemake/
 **/__pycache__
+config

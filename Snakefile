@@ -27,6 +27,7 @@ Steps:
     15  reference_db      MMseqs2 reference database
 """
 
+import os
 import yaml
 from pathlib import Path
 
@@ -35,6 +36,12 @@ configfile: "config/config.yaml"
 
 OUTDIR = Path(config["output_dir"])
 SCRIPTS = Path("workflow/scripts")
+TEST_MODE = config.get("test_mode", False)
+
+# Export test mode as env var so bash/python scripts can detect it
+# even when overridden via: snakemake --config test_mode=true
+if TEST_MODE:
+    os.environ["PHYLONAP_TEST_MODE"] = "1"
 
 
 # ── Final target ──────────────────────────────────────────────────────────
