@@ -20,7 +20,7 @@ from pathlib import Path
 from Bio import SeqIO
 
 sys.path.insert(0, str(Path(__file__).parent))
-from utils import load_config, resolve_path, get_tool
+from utils import load_config, resolve_path, get_tool, limit_datasets
 
 cfg = load_config()
 outdir = resolve_path(cfg['output_dir'])
@@ -49,6 +49,7 @@ print(f"  Min subcluster size: {MIN_SIZE}")
 
 # ── Parse TreeCluster results ─────────────────────────────────────────────
 tc_files = sorted(TREECLUSTER_DIR.glob('*_clusters.tsv'))
+tc_files = limit_datasets(tc_files, cfg, label='TreeCluster files')
 print(f"\nFound {len(tc_files)} TreeCluster result files")
 
 all_subclusters = []  # list of (base_name, subcluster_id, seq_ids)

@@ -17,6 +17,8 @@ TRIMAL_MODE=$(python3 -c "import yaml; c=yaml.safe_load(open('$CONFIG')); print(
 
 MAFFT=$(python3 -c "import yaml; c=yaml.safe_load(open('$CONFIG')); t=c.get('tools',{}).get('mafft',''); print(t if t else 'mafft')")
 TRIMAL=$(python3 -c "import yaml; c=yaml.safe_load(open('$CONFIG')); t=c.get('tools',{}).get('trimal',''); print(t if t else 'trimal')")
+TEST_MODE=$(python3 -c "import os,yaml; c=yaml.safe_load(open('$CONFIG')); print('1' if os.environ.get('PHYLONAP_TEST_MODE','')=='1' or c.get('test_mode') else '0')")
+TEST_N=$(python3 -c "import yaml; c=yaml.safe_load(open('$CONFIG')); print(c.get('test_n_datasets', 10))")
 
 INPUT_DIR="$OUTDIR/02_filtered_clusters"
 ALIGNED_DIR="$OUTDIR/03_aligned"
@@ -30,10 +32,17 @@ echo "  MAFFT: $MAFFT (--maxiterate $MAX_ITER)"
 echo "  trimAl: $TRIMAL ($TRIMAL_MODE)"
 
 count=0
-total=$(ls "$INPUT_DIR"/*.fasta 2>/dev/null | wc -l | tr -d ' ')
+total=$(find "$INPUT_DIR" -maxdepth 1 -name '*.fasta' | wc -l | tr -d ' ')
 echo "  Input clusters: $total"
 
-for FASTA in "$INPUT_DIR"/*.fasta; do
+# In test mode, limit to N datasets
+FIND_CMD="find '$INPUT_DIR' -maxdepth 1 -name '*.fasta' -print0 | sort -z"
+if [ "$TEST_MODE" = "1" ]; then
+    echo "  ** TEST MODE: limiting to $TEST_N datasets **"
+    total="$TEST_N"
+fi
+
+while IFS= read -r -d '' FASTA; do
     BASE=$(basename "$FASTA" .fasta)
     CLEANED="$ALIGNED_DIR/${BASE}_cleaned.fasta"
     ALIGNED="$ALIGNED_DIR/${BASE}_aligned.fasta"
@@ -64,7 +73,12 @@ for FASTA in "$INPUT_DIR"/*.fasta; do
     if [ $((count % 500)) -eq 0 ] || [ "$count" -le 5 ]; then
         echo "  [$count/$total] $BASE done"
     fi
-done
+    # In test mode, stop after N datasets
+    if [ "$TEST_MODE" = "1" ] && [ "$count" -ge "$TEST_N" ]; then
+        echo "  Test mode: stopping after $TEST_N datasets"
+        break
+    fi
+done < <(find "$INPUT_DIR" -maxdepth 1 -name '*.fasta' -print0 | sort -z)
 
 echo ""
 echo "Done. Trimmed alignments in: $TRIMMED_DIR"

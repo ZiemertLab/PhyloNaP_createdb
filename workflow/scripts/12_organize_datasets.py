@@ -29,7 +29,7 @@ from pathlib import Path
 from Bio import SeqIO
 
 sys.path.insert(0, str(Path(__file__).parent))
-from utils import load_config, resolve_path
+from utils import load_config, resolve_path, limit_datasets
 
 cfg = load_config()
 outdir = resolve_path(cfg['output_dir'])
@@ -67,6 +67,7 @@ print(f"  Indexed {n_indexed:,} sequences")
 
 # ── Step 2: Gather all datasets ───────────────────────────────────────────
 alignment_files = sorted(ALIGNMENT_DIR.glob('*.fasta'))
+alignment_files = limit_datasets(alignment_files, cfg, label='alignments')
 print(f"\n--- Step 2: Processing {len(alignment_files)} datasets ---")
 
 mapping_rows = []

@@ -20,7 +20,7 @@ from pathlib import Path
 import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).parent))
-from utils import load_config, resolve_path
+from utils import load_config, resolve_path, limit_datasets
 
 cfg = load_config()
 outdir = resolve_path(cfg['output_dir'])
@@ -62,6 +62,7 @@ def has_bgc_linkage(annot_file):
 
 
 annot_files = sorted(IN_ANNOT.glob('*_annotations.tsv'))
+annot_files = limit_datasets(annot_files, cfg, label='annotation files')
 print(f"\nProcessing {len(annot_files)} datasets...")
 
 kept = excluded = missing = 0

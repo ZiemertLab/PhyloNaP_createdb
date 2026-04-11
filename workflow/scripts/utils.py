@@ -47,6 +47,34 @@ def get_tool(cfg, tool_name):
     return custom if custom else tool_name
 
 
+def is_test_mode(cfg):
+    """Check if pipeline is running in test mode.
+    
+    Respects both config.yaml and the PHYLONAP_TEST_MODE env var
+    (set by Snakemake when using --config test_mode=true).
+    """
+    env = os.environ.get('PHYLONAP_TEST_MODE', '')
+    if env.lower() in ('1', 'true', 'yes'):
+        return True
+    return bool(cfg.get('test_mode', False))
+
+
+def test_limit(cfg):
+    """Return number of datasets to process in test mode (default 10)."""
+    return int(cfg.get('test_n_datasets', 10))
+
+
+def limit_datasets(file_list, cfg, label="datasets"):
+    """In test mode, limit a sorted file list to N items and print a notice."""
+    if not is_test_mode(cfg):
+        return file_list
+    n = test_limit(cfg)
+    if len(file_list) > n:
+        print(f"  ** TEST MODE: limiting {label} from {len(file_list)} to {n} **")
+        return file_list[:n]
+    return file_list
+
+
 def val(v):
     """Clean string value: return '' if NaN/None/empty."""
     if v is None:

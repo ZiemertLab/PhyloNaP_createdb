@@ -1,0 +1,6 @@
+results/
+config/config.yaml
+config/config_dev.yaml
+logs/
+.snakemake/
+**/__pycache__

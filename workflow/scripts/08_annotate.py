@@ -39,7 +39,7 @@ from Bio import SeqIO
 sys.path.insert(0, str(Path(__file__).parent))
 from utils import (
     load_config, resolve_path, val, clean_species_name,
-    SOURCE_PRIORITY, SOURCE_ORDER, ANNOTATION_COLUMNS
+    SOURCE_PRIORITY, SOURCE_ORDER, ANNOTATION_COLUMNS, limit_datasets
 )
 
 cfg = load_config()
@@ -65,13 +65,9 @@ PE_MAPPING = resolve_path(id_cfg['pe_mapping_tsv'])
 PANBGC_FILE = resolve_path(annot_cfg['panbgc_matches_tsv']) if annot_cfg.get('panbgc_matches_tsv') else None
 CLUSTER_MAPPING = resolve_path(id_cfg['cluster_mapping_tsv']) if id_cfg.get('cluster_mapping_tsv') else None
 
-TEST_MODE = '--test' in sys.argv
-
 print("=" * 80)
 print("STEP 08: COMPREHENSIVE ANNOTATION")
 print("=" * 80)
-if TEST_MODE:
-    print("*** TEST MODE ***\n")
 
 
 # ===== LOAD DATA SOURCES =====
@@ -371,11 +367,8 @@ print("=" * 80)
 dataset_files = sorted(FILTERED_DIR.glob('*.fasta'))
 # Exclude non-dataset files
 dataset_files = [f for f in dataset_files if not f.name.startswith('kept_') and not f.name.startswith('excl')]
+dataset_files = limit_datasets(dataset_files, cfg, label='datasets')
 print(f"Found {len(dataset_files):,} datasets")
-
-if TEST_MODE:
-    dataset_files = dataset_files[:10]
-    print(f"*** TEST MODE: {len(dataset_files)} datasets ***")
 
 processed = 0
 total_seqs = 0

@@ -51,7 +51,7 @@ from Bio import Phylo
 from Bio.Phylo.BaseTree import Clade as BPClade
 
 sys.path.insert(0, str(Path(__file__).parent))
-from utils import load_config, resolve_path, get_tool
+from utils import load_config, resolve_path, get_tool, limit_datasets
 
 cfg = load_config()
 outdir = resolve_path(cfg['output_dir'])
@@ -501,6 +501,7 @@ dataset_dirs = sorted([
     d for d in DATASETS_DIR.iterdir()
     if d.is_dir() and d.name.startswith('PT')
 ])
+dataset_dirs = limit_datasets(dataset_dirs, cfg, label='dataset dirs')
 
 print(f"\nFound {len(dataset_dirs)} datasets")
 print(f"  Taxonomy levels: {' -> '.join(TAX_LEVELS)}")

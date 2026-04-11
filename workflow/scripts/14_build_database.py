@@ -19,7 +19,7 @@ from collections import Counter, defaultdict
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
-from utils import load_config, resolve_path, val
+from utils import load_config, resolve_path, val, limit_datasets
 
 cfg = load_config()
 outdir = resolve_path(cfg['output_dir'])
@@ -173,6 +173,7 @@ if MAPPING_FILE.exists():
 print("\nBuilding dataset entries...")
 folders = sorted([p for p in DATASETS_DIR.iterdir()
                   if p.is_dir() and p.name.startswith('PT')])
+folders = limit_datasets(folders, cfg, label='PT folders')
 print(f"  {len(folders)} PT folders")
 
 sf_groups = defaultdict(list)

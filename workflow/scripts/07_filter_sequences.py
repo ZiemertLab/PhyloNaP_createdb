@@ -24,7 +24,7 @@ import pandas as pd
 from Bio import SeqIO
 
 sys.path.insert(0, str(Path(__file__).parent))
-from utils import load_config, resolve_path, get_tool
+from utils import load_config, resolve_path, get_tool, limit_datasets
 
 cfg = load_config()
 outdir = resolve_path(cfg['output_dir'])
@@ -114,6 +114,7 @@ def compute_mean_raw_length(seq_ids, raw_fasta_dir, base_name):
 
 # ── Process each trimmed alignment ────────────────────────────────────────
 trimmed_files = sorted(TRIMMED_DIR.glob('*_trimmed.fasta'))
+trimmed_files = limit_datasets(trimmed_files, cfg, label='trimmed alignments')
 print(f"\nProcessing {len(trimmed_files)} trimmed alignments...")
 
 report_rows = []

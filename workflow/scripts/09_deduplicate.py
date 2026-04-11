@@ -20,7 +20,7 @@ import pandas as pd
 from Bio import SeqIO
 
 sys.path.insert(0, str(Path(__file__).parent))
-from utils import load_config, resolve_path, SOURCE_PRIORITY
+from utils import load_config, resolve_path, SOURCE_PRIORITY, limit_datasets
 
 cfg = load_config()
 outdir = resolve_path(cfg['output_dir'])
@@ -32,8 +32,6 @@ OUT_ANNOT_DIR = outdir / '09_deduplicated_annotations'
 
 OUT_ALIGN_DIR.mkdir(parents=True, exist_ok=True)
 OUT_ANNOT_DIR.mkdir(parents=True, exist_ok=True)
-
-TEST_MODE = '--test' in sys.argv
 
 print("=" * 80)
 print("STEP 09: DEDUPLICATE IDENTICAL SEQUENCES")
@@ -54,10 +52,8 @@ def aggregate_values(values):
 
 alignment_files = sorted(ALIGNMENT_DIR.glob('*.fasta'))
 alignment_files = [f for f in alignment_files if not f.name.startswith(('kept_', 'excl'))]
+alignment_files = limit_datasets(alignment_files, cfg, label='alignment files')
 print(f"Found {len(alignment_files)} alignment files")
-
-if TEST_MODE:
-    alignment_files = alignment_files[:5]
 
 total_in = total_out = total_removed = 0
 processed = 0

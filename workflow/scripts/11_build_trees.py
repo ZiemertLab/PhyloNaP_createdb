@@ -14,7 +14,7 @@ import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
-from utils import load_config, resolve_path, get_tool
+from utils import load_config, resolve_path, get_tool, limit_datasets
 
 cfg = load_config()
 outdir = resolve_path(cfg['output_dir'])
@@ -37,6 +37,7 @@ print(f"  Timeout: {TIMEOUT}s")
 print(f"  Min sequences: {MIN_SEQS}")
 
 alignment_files = sorted(INPUT_DIR.glob('*.fasta'))
+alignment_files = limit_datasets(alignment_files, cfg, label='alignments')
 print(f"\nFound {len(alignment_files)} alignments")
 
 stats = {'success': 0, 'skipped': 0, 'failed': 0, 'few_seqs': 0}

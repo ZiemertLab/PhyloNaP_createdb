@@ -11,7 +11,8 @@ CONFIG="${1:-config/config.yaml}"
 OUTDIR=$(python3 -c "import yaml; c=yaml.safe_load(open('$CONFIG')); print(c['output_dir'])")
 THRESHOLD=$(python3 -c "import yaml; c=yaml.safe_load(open('$CONFIG')); print(c['params']['treecluster_threshold'])")
 TREECLUSTER=$(python3 -c "import yaml; c=yaml.safe_load(open('$CONFIG')); t=c.get('tools',{}).get('treecluster',''); print(t if t else 'TreeCluster.py')")
-
+TEST_MODE=$(python3 -c "import os,yaml; c=yaml.safe_load(open('$CONFIG')); print('1' if os.environ.get('PHYLONAP_TEST_MODE','')=='1' or c.get('test_mode') else '0')")
+TEST_N=$(python3 -c "import yaml; c=yaml.safe_load(open('$CONFIG')); print(c.get('test_n_datasets', 10))")
 INPUT_DIR="$OUTDIR/04_fast_trees"
 OUTPUT_DIR="$OUTDIR/05_treecluster"
 mkdir -p "$OUTPUT_DIR"
@@ -22,9 +23,14 @@ echo "============================================================"
 echo "  Threshold: $THRESHOLD"
 
 count=0
-total=$(ls "$INPUT_DIR"/*.tree 2>/dev/null | wc -l | tr -d ' ')
+total=$(find "$INPUT_DIR" -maxdepth 1 -name '*.tree' | wc -l | tr -d ' ')
 
-for TREE in "$INPUT_DIR"/*.tree; do
+if [ "$TEST_MODE" = "1" ]; then
+    echo "  ** TEST MODE: limiting to $TEST_N datasets **"
+    total="$TEST_N"
+fi
+
+while IFS= read -r -d '' TREE; do
     BASE=$(basename "$TREE" .tree)
     OUT="$OUTPUT_DIR/${BASE}_clusters.tsv"
     count=$((count + 1))
@@ -39,6 +45,11 @@ for TREE in "$INPUT_DIR"/*.tree; do
     if [ $((count % 500)) -eq 0 ] || [ "$count" -le 5 ]; then
         echo "  [$count/$total] $BASE"
     fi
-done
+
+    if [ "$TEST_MODE" = "1" ] && [ "$count" -ge "$TEST_N" ]; then
+        echo "  Test mode: stopping after $TEST_N datasets"
+        break
+    fi
+done < <(find "$INPUT_DIR" -maxdepth 1 -name '*.tree' -print0 | sort -z)
 
 echo "Done. TreeCluster results in: $OUTPUT_DIR ($count processed)"
