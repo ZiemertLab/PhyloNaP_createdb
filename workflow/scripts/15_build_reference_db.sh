@@ -20,7 +20,8 @@ CONFIG="$SCRIPT_DIR/../../config/config.yaml"
 read_cfg() { python3 -c "import yaml; c=yaml.safe_load(open('$CONFIG')); print($1)"; }
 
 OUTPUT_DIR="$(read_cfg "c['output_dir']")"
-MMSEQS="$(read_cfg "c.get('tools',{}).get('mmseqs','mmseqs')")"
+MMSEQS="$(read_cfg "c.get('tools',{}).get('mmseqs') or 'mmseqs'")"
+MMSEQS="${MMSEQS:-mmseqs}"
 DEDUP_ID="$(read_cfg "c['params']['dereplication_identity']")"
 DEDUP_COV="$(read_cfg "c['params']['dereplication_coverage']")"
 
@@ -52,7 +53,6 @@ if [ ! -f "$DEDUP_FASTA" ]; then
         --min-seq-id "$DEDUP_ID" \
         -c "$DEDUP_COV" \
         --cov-mode 1 \
-        --cluster-mode 2 \
         --threads "$(nproc 2>/dev/null || echo 4)"
 
     # easy-cluster produces dedup_rep_seq.fasta

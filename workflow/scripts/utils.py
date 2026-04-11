@@ -107,6 +107,7 @@ SOURCE_ORDER = ['mite', 'mibig', 'swiss', 'as_db']  # iteration order (highest f
 # Annotation output columns
 ANNOTATION_COLUMNS = [
     'ID', 'Source', 'MITE_ID', 'Dataset_MITE_IDs', 'Uniprot_ID', 'MIBiG_ID',
+    'Cluster',
     'gene_name', 'enzyme_name', 'tailoring', 'description', 'reaction_description',
     'cofactors_organic', 'cofactors_inorganic', 'product', 'Rhea', 'Enzyme_function',
     'Entry_Name', 'ProteinExistence', 'EC_Number', 'PDB_IDs',
@@ -118,6 +119,7 @@ ANNOTATION_COLUMNS = [
 # Metadata columns tracked in the database
 METADATA_COLUMNS = [
     'Source', 'MITE_ID', 'Dataset_MITE_IDs', 'Uniprot_ID', 'MIBiG_ID', 'mibig_id',
+    'Cluster',
     'gene_name', 'enzyme_name', 'tailoring', 'description', 'reaction_description',
     'cofactors_organic', 'cofactors_inorganic', 'product', 'Rhea', 'Enzyme_function',
     'Entry_Name', 'ProteinExistence', 'EC_Number', 'PDB_IDs',

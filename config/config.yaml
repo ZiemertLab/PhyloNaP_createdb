@@ -5,6 +5,10 @@
 # All paths can be absolute or relative to the pipeline root directory.
 # ============================================================================
 
+# --- Test mode (run only N datasets to verify pipeline works) ---------------
+test_mode: false
+test_n_datasets: 10       # number of datasets to process in test mode
+
 # --- Output directory (all intermediate and final outputs go here) ----------
 output_dir: "results"
 
@@ -14,34 +18,34 @@ output_dir: "results"
 
 input_data:
   # FASTA files — protein sequences from each source
-  mite_fasta_dir: "resources/mite_fasta/"          # directory of per-enzyme FASTA files from MITE
-  antismash_fasta: "resources/proteins_renamed_AS.fasta"
-  swissprot_fasta: "resources/uniprot_swiss_sequences.fasta"
-  mibig_fasta: "resources/mibig_prot_seqs_4.0.fasta"
+  mite_fasta_dir: "/Users/sasha/Desktop/tubingen/tailoring_ensymes/data_collection/mite_data/mite_data/mite_2025.fasta"          # directory of per-enzyme FASTA files from MITE
+  antismash_fasta: "/Users/sasha/Desktop/tubingen/tailoring_ensymes/data_collection/clusterblast/proteins_renamed_AS.fasta"
+  swissprot_fasta: "/Users/sasha/Desktop/tubingen/tailoring_ensymes/data_collection/swissprot/uniprot_swiss_sequences.fasta"
+  mibig_fasta: "/Users/sasha/Desktop/tubingen/tailoring_ensymes/data_collection/mibig_4.0/mibig_prot_seqs_4.0.fasta_re.fa"
 
 # --- Annotation source files ------------------------------------------------
 annotations:
   # MITE
-  mite_summary_csv: "resources/mite_summary.csv"             # MITE summary table
-  mite_json_dir: "resources/mite_json/"                       # per-entry JSON directory
+  mite_summary_csv: '/Users/sasha/Desktop/tubingen/tailoring_ensymes/data_collection/mite_db_oct25/summary.csv'            # MITE summary table
+  mite_json_dir: '/Users/sasha/Desktop/tubingen/tailoring_ensymes/data_collection/mite_data/mite_data/data'                       # per-entry JSON directory
 
   # MIBiG
-  mibig_annot_tsv: "resources/mibig_annotations.tsv"          # MIBiG protein annotations
+  mibig_annot_tsv: '/Users/sasha/Desktop/tubingen/tailoring_ensymes/data_collection/mibig_4.0/mibig_prot_seqs_4.0_annot_name_upd.tsv'          # MIBiG protein annotations
 
   # AntiSMASH / ClusterBlast
-  antismash_annot_tsv: "resources/antismash_annotations.tsv"  # merged AS annotation + taxonomy
+  antismash_annot_tsv: '/Users/sasha/Desktop/tubingen/tailoring_ensymes/data_collection/clusterblast/merged_as_annot_taxonomy_feb25.tsv'  # merged AS annotation + taxonomy
 
   # SwissProt
-  swissprot_annot_tsv: "resources/swissprot_annotations.tsv"  # UniProtKB reviewed entries
+  swissprot_annot_tsv: '/Users/sasha/Desktop/tubingen/tailoring_ensymes/data_collection/phylonap_metadata/uniprotkb_AND_reviewed_true_2025_05_30_short_sk_re_col_fix_pdb_level.tsv'  # UniProtKB reviewed entries
 
   # EggNOG-mapper results
-  eggnog_annotations: "resources/eggnog_results.emapper.annotations"
+  eggnog_annotations: '/Users/sasha/Desktop/tubingen/tailoring_ensymes/PhyloNaP_db/updating_db_30.10/additional_annotations/eggnog_results.emapper.annotations'
 
   # HMM-based superfamily classification
-  superfamily_hits_tsv: "resources/pe_superfamily_hits.tsv"
+  superfamily_hits_tsv: "/Users/sasha/Desktop/tubingen/tailoring_ensymes/PhyloNaP_db/updating_db_30.10/additional_annotations/pe_superfamily_hits.tsv"
 
   # PanBGC matches (optional)
-  panbgc_matches_tsv: "resources/PanBGC_matches.tsv"
+  panbgc_matches_tsv: "/Users/sasha/Desktop/tubingen/tailoring_ensymes/PhyloNaP_db/updating_db_30.10/11.extra_annotations/PanBGC_matches.tsv"
 
 # --- Curated datasets (optional) -------------------------------------------
 # If provided, curated superfamilies are merged into the final database.
@@ -53,7 +57,7 @@ curated_data_dir: null  # e.g. "resources/curated_datasets/"
 # PE ID mapping: maps original sequence IDs → internal PE identifiers.
 # Produced during initial data collection (not part of this pipeline).
 id_mapping:
-  pe_mapping_tsv: "resources/pe_id_mapping.tsv"       # original_id <TAB> PE_id
+  pe_mapping_tsv: "resources/updated_id_mapping.tsv"       # original_id <TAB> PE_id
   cluster_mapping_tsv: "resources/cluster_pe_mapping.tsv"  # cluster_rep <TAB> member_PE_ids
 
 # --- External tool paths (leave empty to use $PATH) -------------------------
@@ -63,7 +67,7 @@ tools:
   trimal: ""       # path to trimal binary
   fasttree: ""     # path to FastTree binary
   treecluster: ""  # path to TreeCluster.py
-  alistat: ""      # path to alistat binary
+  alistat: "/Users/sasha/Desktop/tubingen/tools/alistat/AliStat-1.16-macOS-arm/bin/alistat"      # path to alistat binary
   rscript: ""      # path to Rscript binary (for MAD rooting)
 
 # --- Pipeline parameters ---------------------------------------------------

@@ -130,11 +130,16 @@ for jf in json_files:
         uniprot = db.get('uniprot', '')
         genpept = db.get('genpept', '')
         mibig = db.get('mibig', '')
-        for pid in [uniprot, genpept, mibig]:
+        # Index only protein-level IDs (uniprot, genpept) — NOT bare MIBiG IDs
+        # which are cluster-level and would cause false MITE matches for
+        # all proteins in the same BGC.
+        for pid in [uniprot, genpept]:
             if pid:
                 mite_id_lookup[pid].add(mid)
                 mite_protein_ids[mid].add(pid)
-        # Composite keys
+        if mibig:
+            mite_protein_ids[mid].add(mibig)  # track for info, not for lookup
+        # Composite keys (BGC_protein, MITE_protein) for exact original_id matching
         for combo in [f"{mibig}_{uniprot}", f"{mibig}_{genpept}",
                       f"{mid}_{genpept}", f"{mid}_{uniprot}"]:
             if combo and '_' in combo and not combo.startswith('_'):
@@ -255,13 +260,15 @@ if PANBGC_FILE and PANBGC_FILE.exists():
     print("9. Loading PanBGC matches...")
     df_pb = pd.read_csv(PANBGC_FILE, sep='\t')
     for rec in df_pb.to_dict('records'):
-        seq_id = val(rec.get('sequence_id', ''))
-        if seq_id:
-            panbgc_data[seq_id] = {
-                'GCF_ID': val(rec.get('GCF_ID', '')),
-                'GCF_OG': val(rec.get('GCF_OG', '')),
-            }
+        pe_id = val(rec.get('PE_ID', ''))
+        mappings = val(rec.get('panBGC_mappings', ''))
+        status = val(rec.get('match_status', ''))
+        if pe_id and mappings and status == 'mapped':
+            # Take only the first mapping if multiple (separated by ;)
+            first_mapping = mappings.split(';')[0].strip()
+            panbgc_data[pe_id] = first_mapping
     print(f"   {len(panbgc_data):,} PanBGC matches")
+    del df_pb; gc.collect()
 else:
     print("9. PanBGC: not provided (skipping)")
 
@@ -269,18 +276,30 @@ else:
 # ===== ANNOTATION FUNCTIONS =====
 
 def resolve_mite_ids(original_id):
-    """Find MITE accessions linked to an original_id."""
+    """Find MITE accessions linked to an original_id.
+
+    Only returns MITE IDs for direct protein-level matches:
+      - Full original_id in mite_id_lookup (covers protein accessions
+        and composite keys like BGC_protein or MITE_protein)
+      - MITE accession prefix in underscore-separated IDs
+
+    Does NOT split original_id by '_' to check individual parts against
+    mite_id_lookup, because that would incorrectly match all proteins
+    sharing a BGC with a MITE enzyme (the broadcast bug).
+    """
     found = set()
+    # 1. Direct full-ID lookup (covers uniprot, genpept, and composite keys)
     if original_id in mite_id_lookup:
         found.update(mite_id_lookup[original_id])
+    # 2. If the ID itself is or starts with a MITE accession
     if original_id.startswith('MITE'):
         parts = original_id.split('_', 1)
         if parts[0] in mite_annotations:
             found.add(parts[0])
-    if '_' in original_id:
+    # 3. For composite IDs, only extract embedded MITE accessions —
+    #    do NOT do mite_id_lookup on individual parts.
+    elif '_' in original_id:
         for part in original_id.split('_'):
-            if part in mite_id_lookup:
-                found.update(mite_id_lookup[part])
             if part.startswith('MITE') and part in mite_annotations:
                 found.add(part)
     return list(found)
@@ -355,6 +374,16 @@ def annotate_pe(pe_id, all_pe_ids=None):
         for col in ['Superfamily', 'All_superfamilies']:
             if not merged[col] and col in sf:
                 merged[col] = sf[col]
+    # Cluster: MIBiG_ID first, then PanBGC mapping as fallback
+    if not merged.get('Cluster'):
+        if merged.get('MIBiG_ID'):
+            merged['Cluster'] = merged['MIBiG_ID']
+        else:
+            for pid in all_pe_ids:
+                pb = panbgc_data.get(pid, '')
+                if pb:
+                    merged['Cluster'] = pb
+                    break
     return merged
 
 
@@ -384,9 +413,18 @@ for ds_file in dataset_files:
 
     # Annotate each sequence
     rows = []
+    dataset_mite_ids = set()
     for seq in sequences:
         row = annotate_pe(seq.id, [seq.id])
         rows.append(row)
+        # Collect MITE IDs at dataset level (for informational field)
+        if row.get('MITE_ID'):
+            dataset_mite_ids.add(row['MITE_ID'])
+
+    # Set Dataset_MITE_IDs for all rows (informational, cluster-level)
+    ds_mite_str = ';'.join(sorted(dataset_mite_ids)) if dataset_mite_ids else ''
+    for row in rows:
+        row['Dataset_MITE_IDs'] = ds_mite_str
 
     df = pd.DataFrame(rows, columns=ANNOTATION_COLUMNS)
     df.to_csv(output_file, sep='\t', index=False)

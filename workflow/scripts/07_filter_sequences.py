@@ -16,8 +16,10 @@ Output: results/07_filtered_datasets/  — datasets passing all QC
         results/07_filtered_datasets/filter_report.tsv
 """
 
+import os
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 import pandas as pd
@@ -59,40 +61,54 @@ print(f"  Min sequences:    {MIN_SEQS}")
 
 
 def run_alistat_per_seq(fasta_path):
-    """Run AliStat and parse per-sequence Cr values, Ca, and alignment length."""
-    try:
-        result = subprocess.run(
-            [ALISTAT, '-i', str(fasta_path), '-t', '6', '-s'],
-            capture_output=True, text=True, timeout=120
-        )
-        ca = 0.0
-        al_len = 0
-        seq_cr = {}
-        in_per_seq = False
+    """Run AliStat and parse per-sequence Cr values, Ca, and alignment length.
 
-        for line in result.stdout.split('\n'):
-            line = line.strip()
-            if 'Ca:' in line:
-                try:
-                    ca = float(line.split(':')[-1].strip())
-                except ValueError:
-                    pass
-            elif 'Alignment length' in line:
-                try:
-                    al_len = int(line.split(':')[-1].strip())
-                except ValueError:
-                    pass
-            elif line.startswith('Seq_ID') or line.startswith('seq_id'):
-                in_per_seq = True
-                continue
-            elif in_per_seq and '\t' in line:
-                parts = line.split('\t')
-                if len(parts) >= 2:
-                    try:
-                        seq_cr[parts[0]] = float(parts[1])
-                    except ValueError:
-                        pass
-        return ca, al_len, seq_cr
+    AliStat syntax: alistat <file> <datatype> [options]
+      datatype 6 = amino acids
+      -t 1      = output per-sequence Cr table (Table_1.csv)
+      -o PREFIX = write output files to PREFIX.Summary.txt / PREFIX.Table_1.csv
+    """
+    try:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            out_prefix = os.path.join(tmpdir, 'alistat_out')
+            subprocess.run(
+                [ALISTAT, str(fasta_path), '6', '-t', '1', '-o', out_prefix],
+                capture_output=True, text=True, timeout=120
+            )
+            ca = 0.0
+            al_len = 0
+            seq_cr = {}
+
+            # Parse Ca and alignment length from Summary.txt
+            summary_file = out_prefix + '.Summary.txt'
+            if os.path.exists(summary_file):
+                for line in open(summary_file):
+                    if '(Ca)' in line:
+                        try:
+                            ca = float(line.rsplit(None, 1)[-1].strip())
+                        except ValueError:
+                            pass
+                    elif 'Number of sites in the alignment' in line:
+                        try:
+                            al_len = int(line.rsplit(None, 1)[-1].strip())
+                        except ValueError:
+                            pass
+
+            # Parse per-sequence Cr from Table_1.csv
+            # Format: Seq ID,Sequence,Valid sites,Cr
+            table_file = out_prefix + '.Table_1.csv'
+            if os.path.exists(table_file):
+                for i, line in enumerate(open(table_file)):
+                    if i == 0:  # skip header
+                        continue
+                    parts = line.strip().split(',')
+                    if len(parts) >= 4:
+                        try:
+                            seq_cr[parts[1]] = float(parts[3])
+                        except (ValueError, IndexError):
+                            pass
+
+            return ca, al_len, seq_cr
     except Exception:
         return 0.0, 0, {}
 
