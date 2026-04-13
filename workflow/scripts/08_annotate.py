@@ -77,11 +77,11 @@ print("1. Loading PE ID mapping...")
 new_to_original = {}
 original_to_new = {}
 with open(PE_MAPPING) as f:
-    next(f)  # header
+    next(f)  # header: new_id  original_id  [source]
     for line in f:
         parts = line.strip().split('\t')
         if len(parts) >= 2:
-            orig, new_id = parts[0], parts[1]
+            new_id, orig = parts[0], parts[1]
             new_to_original[new_id] = orig
             original_to_new[orig] = new_id
 print(f"   {len(new_to_original):,} mappings")
@@ -255,18 +255,34 @@ print(f"   {len(superfamily_annotations):,} superfamily records")
 del df_sf; gc.collect()
 
 # 9. PanBGC (optional)
+# Each entry stores {'GCF_ID': ..., 'GCF_OG': ..., 'Cluster': ...}
+# with comma-separated unique values when multiple mappings exist.
 panbgc_data = {}
 if PANBGC_FILE and PANBGC_FILE.exists():
     print("9. Loading PanBGC matches...")
     df_pb = pd.read_csv(PANBGC_FILE, sep='\t')
     for rec in df_pb.to_dict('records'):
         pe_id = val(rec.get('PE_ID', ''))
-        mappings = val(rec.get('panBGC_mappings', ''))
+        mappings_raw = val(rec.get('panBGC_mappings', ''))
         status = val(rec.get('match_status', ''))
-        if pe_id and mappings and status == 'mapped':
-            # Take only the first mapping if multiple (separated by ;)
-            first_mapping = mappings.split(';')[0].strip()
-            panbgc_data[pe_id] = first_mapping
+        if pe_id and mappings_raw and status == 'mapped':
+            gcf_ids, gcf_ogs, regions = [], [], []
+            for mapping in mappings_raw.split(';'):
+                fields = mapping.strip().split('|')
+                if len(fields) >= 3:
+                    gcf_ids.append(fields[0])
+                    gcf_ogs.append(fields[1])
+                    regions.append(fields[2])
+            if regions:
+                # Deduplicate while preserving order
+                def unique_ordered(lst):
+                    seen = set()
+                    return [x for x in lst if not (x in seen or seen.add(x))]
+                panbgc_data[pe_id] = {
+                    'GCF_ID':  ','.join(unique_ordered(gcf_ids)),
+                    'GCF_OG':  ','.join(unique_ordered(gcf_ogs)),
+                    'Cluster': ','.join(unique_ordered(regions)),
+                }
     print(f"   {len(panbgc_data):,} PanBGC matches")
     del df_pb; gc.collect()
 else:
@@ -374,16 +390,23 @@ def annotate_pe(pe_id, all_pe_ids=None):
         for col in ['Superfamily', 'All_superfamilies']:
             if not merged[col] and col in sf:
                 merged[col] = sf[col]
-    # Cluster: MIBiG_ID first, then PanBGC mapping as fallback
-    if not merged.get('Cluster'):
-        if merged.get('MIBiG_ID'):
-            merged['Cluster'] = merged['MIBiG_ID']
-        else:
-            for pid in all_pe_ids:
-                pb = panbgc_data.get(pid, '')
-                if pb:
-                    merged['Cluster'] = pb
-                    break
+    # PanBGC: GCF_ID, GCF_OG, and Cluster (region)
+    for pid in all_pe_ids:
+        pb = panbgc_data.get(pid)
+        if pb:
+            if not merged.get('GCF_ID'):
+                merged['GCF_ID'] = pb['GCF_ID']
+            if not merged.get('GCF_OG'):
+                merged['GCF_OG'] = pb['GCF_OG']
+            # Cluster: MIBiG_ID takes priority, PanBGC region is fallback
+            if not merged.get('Cluster'):
+                if merged.get('MIBiG_ID'):
+                    merged['Cluster'] = merged['MIBiG_ID']
+                else:
+                    merged['Cluster'] = pb['Cluster']
+            break
+    if not merged.get('Cluster') and merged.get('MIBiG_ID'):
+        merged['Cluster'] = merged['MIBiG_ID']
     return merged
 
 

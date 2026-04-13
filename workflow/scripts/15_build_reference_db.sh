@@ -24,6 +24,7 @@ MMSEQS="$(read_cfg "c.get('tools',{}).get('mmseqs') or 'mmseqs'")"
 MMSEQS="${MMSEQS:-mmseqs}"
 DEDUP_ID="$(read_cfg "c['params']['dereplication_identity']")"
 DEDUP_COV="$(read_cfg "c['params']['dereplication_coverage']")"
+CURATED_FASTA="$(read_cfg "c.get('curated_fasta') or ''")" || CURATED_FASTA=""
 
 INPUT_FASTA="$OUTPUT_DIR/12_datasets/all_sequences_merged.fasta"
 REFDB_DIR="$OUTPUT_DIR/15_reference_db"
@@ -36,6 +37,7 @@ echo "========================================================================"
 echo "  Input:         $INPUT_FASTA"
 echo "  Output:        $REFDB_DIR"
 echo "  Dereplication: ${DEDUP_ID} id / ${DEDUP_COV} cov"
+[ -n "$CURATED_FASTA" ] && echo "  Curated FASTA: $CURATED_FASTA" || echo "  Curated FASTA: (not provided)"
 echo ""
 
 mkdir -p "$REFDB_DIR" "$MMSEQS_DB_DIR"
@@ -68,12 +70,33 @@ else
     echo "Dereplicated FASTA already exists, skipping."
 fi
 
+# ── Append curated sequences (already dereplicated) ──────────────────────
+COMBINED_FASTA="$DEDUP_FASTA"
+if [ -n "$CURATED_FASTA" ]; then
+    if [ ! -f "$CURATED_FASTA" ]; then
+        echo "ERROR: curated_fasta specified but file not found: $CURATED_FASTA" >&2
+        exit 1
+    fi
+    COMBINED_FASTA="$REFDB_DIR/combined.fasta"
+    if [ ! -f "$COMBINED_FASTA" ]; then
+        echo ""
+        echo "--- Appending curated sequences ---"
+        cat "$DEDUP_FASTA" "$CURATED_FASTA" > "$COMBINED_FASTA"
+        N_CURATED=$(grep -c '^>' "$CURATED_FASTA" || true)
+        N_COMBINED=$(grep -c '^>' "$COMBINED_FASTA" || true)
+        echo "  Curated sequences added: $N_CURATED"
+        echo "  Combined total:          $N_COMBINED"
+    else
+        echo "Combined FASTA already exists, skipping."
+    fi
+fi
+
 # ── Build MMseqs2 database ───────────────────────────────────────────────
 DB_PREFIX="$MMSEQS_DB_DIR/phylonap_refdb"
 if [ ! -f "${DB_PREFIX}.dbtype" ]; then
     echo ""
     echo "--- Building MMseqs2 database ---"
-    "$MMSEQS" createdb "$DEDUP_FASTA" "$DB_PREFIX"
+    "$MMSEQS" createdb "$COMBINED_FASTA" "$DB_PREFIX"
     echo "--- Creating index ---"
     "$MMSEQS" createindex "$DB_PREFIX" "$MMSEQS_DB_DIR/tmp" \
         --threads "$(nproc 2>/dev/null || echo 4)"
@@ -88,4 +111,5 @@ echo "========================================================================"
 echo "REFERENCE DATABASE BUILD COMPLETE"
 echo "========================================================================"
 echo "  Dereplicated FASTA: $DEDUP_FASTA"
+[ -n "$CURATED_FASTA" ] && echo "  Combined FASTA:     $COMBINED_FASTA"
 echo "  MMseqs2 database:   $DB_PREFIX"

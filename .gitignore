@@ -4,4 +4,4 @@ config/config_dev.yaml
 logs/
 .snakemake/
 **/__pycache__
-config
+configresources/updated_id_mapping.tsv

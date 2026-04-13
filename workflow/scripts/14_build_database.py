@@ -51,7 +51,8 @@ print(f"  Output:     {OUTPUT_DIR}")
 
 # ── Metadata columns ─────────────────────────────────────────────────────
 METADATA_COLUMNS = [
-    'Source', 'MITE_ID', 'Uniprot_ID', 'MIBiG_ID',
+    'Source', 'MITE_ID', 'Dataset_MITE_IDs', 'Uniprot_ID', 'MIBiG_ID',
+    'Cluster',
     'gene_name', 'enzyme_name', 'tailoring',
     'description', 'reaction_description',
     'cofactors_organic', 'cofactors_inorganic',
@@ -62,6 +63,7 @@ METADATA_COLUMNS = [
     'BGC_type', 'genome_ID',
     'Superfamily', 'All_superfamilies',
     'KEGG_Reaction', 'KEGG_rclass', 'COG_category', 'PFAMs', 'eggnog_EC',
+    'GCF_ID', 'GCF_OG',
 ]
 
 

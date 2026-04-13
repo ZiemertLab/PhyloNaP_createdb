@@ -1,0 +1,337 @@
+{
+    "superfamilies": [
+        {
+            "name": "Flavin-dependant oxidoreductase",
+            "hmm_name": [
+                "DAO"
+            ],
+            "datasets": [
+                {
+                    "name": "glycopeptides fdh",
+                    "id": "T000001",
+                    "description": "Flavin-dependent halogenases (FDHs) from biosynthesis of glycopeptides. The dataset specifies which aminoacids of glycopeptide are halogeneted, and the type of glycopeptide.",
+                    "tree": "FD/fdh_glycopeptides_tree.nwk",
+                    "metadata": "FD/fdh_glycopeptides_function_sp.tsv",
+                    "sequences": "FD/subtree_keep.fa_mafftLinsi.faa",
+                    "metadata_columns": [
+                        "Hal",
+                        "NonHal",
+                        "Type"
+                    ],
+                    "N_proteins": 52,
+                    "N_characterized": 0,
+                    "N_np_val": 0,
+                    "N_np_pred": 0,
+                    "alignment": "FD/fdh_glycopeptides_ref_msa.fasta",
+                    "source": "curated",
+                    "cite": {
+                        "name": "Athina Govriilidou",
+                        "doi": ""
+                    },
+                    "data_type": "protein",
+                    "reviewed": "yes"
+                },
+                {
+                    "name": "Flavin dependant halogenases",
+                    "id": "T000002",
+                    "description": "Flavin dependant halogenases facilitate halogenation at specific locations of the indole ring",
+                    "alignment": "FD/clust2075.fa_mafft.faa",
+                    "sequences": "FD/clust2075.fa",
+                    "tree": "FD/clust2075.fa_mafft_trim.faa_simple_root.treefile.txt",
+                    "metadata": "FD/clust2075.fa_nonred_upd.tsv",
+                    "metadata_columns": [
+                        "product",
+                        "biosyn_class",
+                        "Species",
+                        "Order",
+                        "Class",
+                        "Phylum",
+                        "Superkingdom",
+                        "Cluster",
+                        "Source",
+                        "Entry Name",
+                        "Gene",
+                        "Enzyme_function",
+                        "Function_category",
+                        "Rhea",
+                        "mibig",
+                        "MITE_ID"
+                    ],
+                    "source": "curated",
+                    "cite": {
+                        "name": "Judit Szenei",
+                        "doi": ""
+                    },
+                    "N_proteins": 505,
+                    "N_characterized": 16,
+                    "N_np_val": 25,
+                    "N_np_pred": 470,
+                    "data_type": "protein",
+                    "reviewed": "yes"
+                }
+            ]
+        },
+        {
+            "name": "Terpene synthases and cyclases",
+            "hmm_name": [
+                "Terpene_synth",
+                "Terpene_synth_C",
+                "Terpene_syn_C_2"
+            ],
+            "datasets": [
+                {
+                    "name": "PT_FPPS_like",
+                    "id": "T000003",
+                    "tree_model": "LG+F+R8",
+                    "description": "Prenyltransferases; farnesyl diphosphate (FPP) synthase type.This includes head-to-tail isoprene coupling enzymes, i.e. FPPSs, GGPPSs (geranylgeranyl diphosphate) , GFPPSs (geranylfarnesyl diphosphate) and HPPSs (hexaprenyl diphosphate). It also includes 3-GGI (3-geranylgeranyl indole) synthases, which show sequence similarity to head-to-tail isoprene coupling enzymes.",
+                    "tree": "terpene_cyclase/lisa_vader/PT_FPPS_like.tree",
+                    "metadata": "terpene_cyclase/lisa_vader/PT_FPPS_like.tsv",
+                    "metadata_columns": [
+                        "length",
+                        "organism"
+                    ],
+                    "alignment": "terpene_cyclase/lisa_vader/PT_FPPS_like.mfa",
+                    "sequences": "terpene_cyclase/lisa_vader/PT_FPPS_like.fasta",
+                    "source": "curated",
+                    "cite": {
+                        "name": "Lisa Vader",
+                        "doi": ""
+                    },
+                    "N_proteins": 145,
+                    "N_characterized": 145,
+                    "N_np_val": 0,
+                    "N_np_pred": 0,
+                    "data_type": "protein",
+                    "reviewed": "yes"
+                },
+                {
+                    "name": "PT_phytoene_like",
+                    "id": "T000004",
+                    "tree_model": "LG+F+R8",
+                    "description": "Prenyltransferases; phytoene synthase type.This includes tail-to-tail isoprene coupling enzymes, such as phytoene synthases and squalene synthases",
+                    "tree": "terpene_cyclase/lisa_vader/PT_phytoene_like.tree",
+                    "metadata": "terpene_cyclase/lisa_vader/PT_phytoene_like.tsv",
+                    "metadata_columns": [
+                        "length",
+                        "organism"
+                    ],
+                    "alignment": "terpene_cyclase/lisa_vader/PT_phytoene_like.mfa",
+                    "sequences": "terpene_cyclase/lisa_vader/PT_phytoene_like.fasta",
+                    "source": "curated",
+                    "cite": {
+                        "name": "Lisa Vader",
+                        "doi": ""
+                    },
+                    "N_proteins": 61,
+                    "N_characterized": 55,
+                    "N_np_val": 0,
+                    "N_np_pred": 0,
+                    "data_type": "protein",
+                    "reviewed": "yes"
+                },
+                {
+                    "name": "T1TS",
+                    "id": "T000005",
+                    "tree_model": "LG+F+R8",
+                    "description": "Type 1 terpene synthases",
+                    "tree": "terpene_cyclase/lisa_vader/T1TS.tree",
+                    "metadata": "terpene_cyclase/lisa_vader/T1TS.tsv",
+                    "metadata_columns": [
+                        "length",
+                        "organism",
+                        "cyclisation"
+                    ],
+                    "alignment": "terpene_cyclase/lisa_vader/T1TS.mfa",
+                    "sequences": "terpene_cyclase/lisa_vader/T1TS.fasta",
+                    "source": "curated",
+                    "cite": {
+                        "name": "Lisa Vader",
+                        "doi": ""
+                    },
+                    "N_proteins": 237,
+                    "N_characterized": 220,
+                    "N_np_val": 0,
+                    "N_np_pred": 0,
+                    "data_type": "protein",
+                    "reviewed": "yes"
+                },
+                {
+                    "name": "T2TS",
+                    "id": "T000006",
+                    "tree_model": "LG+F+R8",
+                    "description": "Type 2 terpene synthases",
+                    "tree": "terpene_cyclase/lisa_vader/T2TS.tree",
+                    "metadata": "terpene_cyclase/lisa_vader/T2TS.tsv",
+                    "metadata_columns": [
+                        "organism"
+                    ],
+                    "alignment": "terpene_cyclase/lisa_vader/T2TS.mfa",
+                    "sequences": "terpene_cyclase/lisa_vader/T2TS.fasta",
+                    "source": "curated",
+                    "cite": {
+                        "name": "Lisa Vader",
+                        "doi": ""
+                    },
+                    "N_proteins": 58,
+                    "N_characterized": 0,
+                    "N_np_val": 0,
+                    "N_np_pred": 0,
+                    "data_type": "protein",
+                    "reviewed": "yes"
+                },
+                {
+                    "name": "UbiA_TS",
+                    "id": "T000007",
+                    "tree_model": "LG+F+R8",
+                    "description": "UbiA-type terpene synthases (non-canonical family of terpene synthases)",
+                    "tree": "terpene_cyclase/lisa_vader/UbiA_TS.tree",
+                    "metadata": "terpene_cyclase/lisa_vader/UbiA_TS.tsv",
+                    "metadata_columns": [
+                        "length",
+                        "organism",
+                        "cyclisation"
+                    ],
+                    "alignment": "terpene_cyclase/lisa_vader/UbiA_TS.mfa",
+                    "sequences": "terpene_cyclase/lisa_vader/UbiA_TS.fasta",
+                    "source": "curated",
+                    "cite": {
+                        "name": "Lisa Vader",
+                        "doi": ""
+                    },
+                    "N_proteins": 267,
+                    "N_characterized": 11,
+                    "N_np_val": 0,
+                    "N_np_pred": 0,
+                    "data_type": "protein",
+                    "reviewed": "yes"
+                }
+            ]
+        },
+        {
+            "name": "P450",
+            "hmm_name": [
+                "p450"
+            ],
+            "datasets": [
+                {
+                    "name": "biarylitides",
+                    "id": "T000008",
+                    "description": "A widespread family of enzymes, and the corresponding genes are closely linked to 5-amino acid coding sequences in approximately 200 (actino)bacterial genomes, all with potential for biaryl linkage between amino acids 1 and 3 (Tyr-His in most cases). https://doi.org/10.1016/j.chembiol.2020.11.009",
+                    "tree": "p450/biarylitides_root.nwk",
+                    "metadata": "p450/biarylitides_metadata.tsv",
+                    "metadata_columns": [
+                        "Species",
+                        "Precursor_sequence"
+                    ],
+                    "alignment": "p450/biarylitides_alignment.fasta",
+                    "sequences": "p450/biarylitides.fasta",
+                    "source": "curated",
+                    "cite": {
+                        "name": [
+                            "Leo Padva"
+                        ],
+                        "doi": "DOI: 10.1016/j.chembiol.2020.11.009"
+                    },
+                    "N_proteins": 159,
+                    "N_characterized": 0,
+                    "N_np_val": 0,
+                    "N_np_pred": 158,
+                    "data_type": "protein",
+                    "reviewed": "yes"
+                },
+                {
+                    "name": "glycopeptides_domains",
+                    "id": "T000009",
+                    "description": "Athina dataset + mibig + AS",
+                    "tree": "p450/oxyABCE_crosslinking_u.fa_mafft_trim.faa_simple.treefile",
+                    "metadata": "p450/oxyABCE_crosslinking_annotations_clustered.tsv",
+                    "metadata_columns": [
+                        "bgcid",
+                        "enzyme",
+                        "new_id",
+                        "-1",
+                        "0",
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8",
+                        "9",
+                        "site1",
+                        "site2",
+                        "AS_id",
+                        "biosyn_class",
+                        "genome_ID",
+                        "Species",
+                        "Order",
+                        "Class",
+                        "Phylum",
+                        "Superkingdom",
+                        "Cluster",
+                        "Source",
+                        "Entry Name",
+                        "Gene",
+                        "Rhea",
+                        "Enzyme_function",
+                        "Uniprot_ID",
+                        "Function_category",
+                        "MITE_ID",
+                        "mibig"
+                    ],
+                    "alignment": "p450/oxyABCE_crosslinking_u.fa_mafft.faa",
+                    "sequences": "p450/oxyABCE_crosslinking_u.fa",
+                    "source": "curated",
+                    "cite": {
+                        "name": [
+                            "Athina Gavriilidou",
+                            "Martina Adamek"
+                        ],
+                        "doi": "https://www.biorxiv.org/content/10.1101/2023.02.10.526856v1.full"
+                    },
+                    "data_type": "protein",
+                    "reviewed": "yes"
+                }
+            ]
+        },
+        {
+            "name": "\u03b2-hydroxylases",
+            "hmm_name": [],
+            "datasets": [
+                {
+                    "name": "\u03b2-hydroxylases",
+                    "id": "T000010",
+                    "description": "Two functional subtypes of nonheme Fe(II)/\u03b1-ketoglutarate\u2013dependent aspartyl \u03b2-hydroxylases from siderophore biosynthetic gene clusters, which differ in genomic organization\u2014existing either as fused domains (I\u03b2HAsp) at the carboxyl terminus of a nonribosomal peptide synthetase (NRPS) or as stand-alone enzymes (T\u03b2HAsp)\u2014and each directs opposite stereoselectivity of Asp \u03b2-hydroxylation. The l-threo (2S, 3S) \u03b2-OHAsp residues of alterobactin arise from hydroxylation by the \u03b2-hydroxylase domain integrated into NRPS AltH, while l-erythro (2S, 3R) \u03b2-OHAsp in delftibactin arises from the stand-alone \u03b2-hydroxylase DelD. Cupriachelin contains both l-threo and l-erythro \u03b2-OHAsp, consistent with the presence of both types of \u03b2-hydroxylases in the biosynthetic gene cluster. A third subtype of nonheme Fe(II)/\u03b1-ketoglutarate\u2013dependent enzymes (I\u03b2HHis) hydroxylates histidyl residues with l-threo stereospecificity.",
+                    "tree": "zach/4types-gb-5R.fst.contree",
+                    "metadata": "zach/4types-gb-5R.tsv",
+                    "metadata_columns": [
+                        "Gene_name",
+                        "Molecule",
+                        "NCBI Accession",
+                        "Hydroxylated_AA",
+                        "NRPS_Architecture",
+                        "Species"
+                    ],
+                    "alignment": "zach/4types-gb-5R.faa",
+                    "sequences": "zach/4types-gb-5R.fasta",
+                    "tree_model": "LG+F+R5",
+                    "source": "curated",
+                    "cite": {
+                        "name": [
+                            "Zach Reitz"
+                        ],
+                        "doi": "https://doi.org/10.1073/pnas.1903161116"
+                    },
+                    "N_proteins": 33,
+                    "N_characterized": 0,
+                    "N_np_val": 33,
+                    "N_np_pred": 0,
+                    "data_type": "domains",
+                    "reviewed": "yes"
+                }
+            ]
+        }
+    ]
+}

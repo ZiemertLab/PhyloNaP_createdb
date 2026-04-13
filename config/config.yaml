@@ -52,6 +52,7 @@ annotations:
 # Set to null or remove to build automatic-only database.
 curated_json: null   # e.g. "resources/curated.json"
 curated_data_dir: null  # e.g. "resources/curated_datasets/"
+curated_fasta: "resources/curated_derepl.fa"  # already-dereplicated FASTA appended to the reference DB in step 15
 
 # --- ID mapping -------------------------------------------------------------
 # PE ID mapping: maps original sequence IDs → internal PE identifiers.

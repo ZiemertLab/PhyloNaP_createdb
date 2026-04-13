@@ -114,6 +114,7 @@ ANNOTATION_COLUMNS = [
     'organism', 'Species', 'domain', 'Superkingdom', 'phylum', 'class', 'order', 'family',
     'BGC_type', 'genome_ID', 'Superfamily', 'All_superfamilies',
     'KEGG_Reaction', 'KEGG_rclass', 'COG_category', 'PFAMs', 'eggnog_EC',
+    'GCF_ID', 'GCF_OG',
 ]
 
 # Metadata columns tracked in the database
@@ -126,4 +127,5 @@ METADATA_COLUMNS = [
     'organism', 'Species', 'domain', 'Superkingdom', 'phylum', 'class', 'order', 'family',
     'BGC_type', 'genome_ID', 'Superfamily', 'All_superfamilies',
     'KEGG_Reaction', 'KEGG_rclass', 'COG_category', 'PFAMs', 'eggnog_EC',
+    'GCF_ID', 'GCF_OG',
 ]
