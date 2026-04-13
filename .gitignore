@@ -5,3 +5,6 @@ logs/
 .snakemake/
 **/__pycache__
 configresources/updated_id_mapping.tsv
+resources/updated_id_mapping.tsv
+populate_results_from_deployed.sh
+reannotate_deployed.sh
