@@ -218,7 +218,7 @@ for i, folder in enumerate(folders, 1):
             "id": pt_id,
             "description": ann['description'],
             "tree": tree_path,
-            "tree_model": "LG",
+            "tree_model": "JTT",
             "tree_rooting_method": "",
             "metadata": f'datasets/{pt_id}/{pt_id}_annotations.tsv',
             "metadata_columns": ann['populated_cols'],

@@ -53,7 +53,7 @@ Input FASTA files
 └────────┬────────────┘
          ▼
 ┌─────────────────────┐
-│ 11. Build trees     │  FastTree LG + gamma
+│ 11. Build trees     │  FastTree
 └────────┬────────────┘
          ▼
 ┌─────────────────────┐

@@ -1,13 +1,16 @@
 #!/usr/bin/env bash
 # Step 15: Build MMseqs2 reference database for sequence searching.
 #
-# Dereplicates all merged sequences at 70% identity / 80% coverage,
-# then creates a searchable MMseqs2 database.
+# The MMseqs2 database is built from ALL input sequences so that every
+# original sequence ID is preserved and searchable.  Dereplication at
+# 70 % identity / 80 % coverage is run separately to produce a compact
+# FASTA (dereplicated.fasta) for reference, but it does NOT feed into
+# the database – the full sequence set does.
 #
 # Output:
 #   results/15_reference_db/
-#     dereplicated.fasta          Dereplicated sequences
-#     mmseqs_db/                  MMseqs2 indexed database
+#     dereplicated.fasta          Compact dereplicated sequences (reference only)
+#     mmseqs_db/                  MMseqs2 indexed database (all sequences)
 #
 # Usage: bash 15_build_reference_db.sh
 
@@ -31,12 +34,16 @@ REFDB_DIR="$OUTPUT_DIR/15_reference_db"
 DEDUP_FASTA="$REFDB_DIR/dereplicated.fasta"
 MMSEQS_DB_DIR="$REFDB_DIR/mmseqs_db"
 
+# The FASTA that goes into the MMseqs2 DB always uses the full sequence set
+# (plus curated sequences if provided).  DB_INPUT_FASTA is set below.
+DB_INPUT_FASTA="$INPUT_FASTA"
+
 echo "========================================================================"
 echo "STEP 15: BUILD REFERENCE DATABASE"
 echo "========================================================================"
 echo "  Input:         $INPUT_FASTA"
 echo "  Output:        $REFDB_DIR"
-echo "  Dereplication: ${DEDUP_ID} id / ${DEDUP_COV} cov"
+echo "  Dereplication: ${DEDUP_ID} id / ${DEDUP_COV} cov (compact FASTA only, not used for DB)"
 [ -n "$CURATED_FASTA" ] && echo "  Curated FASTA: $CURATED_FASTA" || echo "  Curated FASTA: (not provided)"
 echo ""
 
@@ -57,9 +64,13 @@ if [ ! -f "$DEDUP_FASTA" ]; then
         --cov-mode 1 \
         --threads "$(nproc 2>/dev/null || echo 4)"
 
-    # easy-cluster produces dedup_rep_seq.fasta
-    mv "$REFDB_DIR/dedup_rep_seq.fasta" "$DEDUP_FASTA"
-    rm -f "$REFDB_DIR"/dedup_all_seqs.fasta "$REFDB_DIR"/dedup_cluster.tsv
+    # easy-cluster produces dedup_rep_seq.fasta, dedup_all_seqs.fasta, dedup_cluster.tsv
+    mv "$REFDB_DIR/dedup_rep_seq.fasta"  "$DEDUP_FASTA"
+    mv "$REFDB_DIR/dedup_all_seqs.fasta" "$REFDB_DIR/all_seqs.fasta"
+    # Keep cluster membership so every original ID can be mapped back to its representative.
+    # Place it inside mmseqs_db/ so it is co-located with the database files and is
+    # included whenever the DB directory is copied to a deployment location.
+    mv "$REFDB_DIR/dedup_cluster.tsv"    "$MMSEQS_DB_DIR/cluster_membership.tsv"
     rm -rf "$TMP_DIR"
 
     N_IN=$(grep -c '^>' "$INPUT_FASTA" || true)
@@ -70,33 +81,36 @@ else
     echo "Dereplicated FASTA already exists, skipping."
 fi
 
-# ── Append curated sequences (already dereplicated) ──────────────────────
-COMBINED_FASTA="$DEDUP_FASTA"
+# combine curated and automated fasta
+
+# ── Append curated sequences to the full input for the DB ────────────────
+# Curated sequences are appended to the FULL input (not the dereplicated
+# subset) so all original IDs remain in the database.
 if [ -n "$CURATED_FASTA" ]; then
     if [ ! -f "$CURATED_FASTA" ]; then
         echo "ERROR: curated_fasta specified but file not found: $CURATED_FASTA" >&2
         exit 1
     fi
-    COMBINED_FASTA="$REFDB_DIR/combined.fasta"
-    if [ ! -f "$COMBINED_FASTA" ]; then
+    DB_INPUT_FASTA="$REFDB_DIR/db_input.fasta"
+    if [ ! -f "$DB_INPUT_FASTA" ]; then
         echo ""
-        echo "--- Appending curated sequences ---"
-        cat "$DEDUP_FASTA" "$CURATED_FASTA" > "$COMBINED_FASTA"
+        echo "--- Appending curated sequences to full input ---"
+        cat "$INPUT_FASTA" "$CURATED_FASTA" > "$DB_INPUT_FASTA"
         N_CURATED=$(grep -c '^>' "$CURATED_FASTA" || true)
-        N_COMBINED=$(grep -c '^>' "$COMBINED_FASTA" || true)
+        N_DB=$(grep -c '^>' "$DB_INPUT_FASTA" || true)
         echo "  Curated sequences added: $N_CURATED"
-        echo "  Combined total:          $N_COMBINED"
+        echo "  DB input total:          $N_DB"
     else
-        echo "Combined FASTA already exists, skipping."
+        echo "DB input FASTA already exists, skipping."
     fi
 fi
 
 # ── Build MMseqs2 database ───────────────────────────────────────────────
-DB_PREFIX="$MMSEQS_DB_DIR/phylonap_refdb"
+DB_PREFIX="$MMSEQS_DB_DIR/referenceDB"
 if [ ! -f "${DB_PREFIX}.dbtype" ]; then
     echo ""
     echo "--- Building MMseqs2 database ---"
-    "$MMSEQS" createdb "$COMBINED_FASTA" "$DB_PREFIX"
+    "$MMSEQS" createdb "$DB_INPUT_FASTA" "$DB_PREFIX"
     echo "--- Creating index ---"
     "$MMSEQS" createindex "$DB_PREFIX" "$MMSEQS_DB_DIR/tmp" \
         --threads "$(nproc 2>/dev/null || echo 4)"
@@ -110,6 +124,6 @@ echo ""
 echo "========================================================================"
 echo "REFERENCE DATABASE BUILD COMPLETE"
 echo "========================================================================"
-echo "  Dereplicated FASTA: $DEDUP_FASTA"
-[ -n "$CURATED_FASTA" ] && echo "  Combined FASTA:     $COMBINED_FASTA"
-echo "  MMseqs2 database:   $DB_PREFIX"
+echo "  Dereplicated FASTA:   $DEDUP_FASTA  (compact reference, not the DB source)"
+[ -n "$CURATED_FASTA" ] && echo "  DB input FASTA:       $DB_INPUT_FASTA  (full set + curated)"
+echo "  MMseqs2 database:     $DB_PREFIX  (all original sequence IDs preserved)"
